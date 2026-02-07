@@ -79,6 +79,18 @@ public class BehaviorUtils {
         entity.getBrain().eraseMemory(InitEntities.CHAIR_POS.get());
     }
 
+    public static void setCachedWorkBlock(LivingEntity entity, PositionTracker tracker){
+        entity.getBrain().setMemory(InitEntities.CACHED_WORK_BLOCK.get(),tracker);
+    }
+
+    public static Optional<PositionTracker> getCachedWorkBlock(LivingEntity entity) {
+        return entity.getBrain().getMemory(InitEntities.CACHED_WORK_BLOCK.get());
+    }
+
+    public static void eraseCachedWorkBlock(LivingEntity entity){
+        entity.getBrain().eraseMemory(InitEntities.CACHED_WORK_BLOCK.get());
+    }
+
     public static void startRide(ServerLevel level, EntityMaid maid, BlockPos pos){
         BlockState state = level.getBlockState(pos);
         if (state.is(TagBlock.SIT_BLOCK)){

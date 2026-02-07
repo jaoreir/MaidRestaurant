@@ -4,6 +4,7 @@ import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.tartaricacid.touhoulittlemaid.geckolib3.core.molang.util.PooledStringHashSet;
 import com.github.ysbbbbbb.kaleidoscopecookery.block.kitchen.PotBlock;
 import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.kitchen.PotBlockEntity;
+import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.kitchen.StockpotBlockEntity;
 import com.github.ysbbbbbb.kaleidoscopecookery.crafting.recipe.PotRecipe;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModItems;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModPoi;
@@ -27,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,6 +73,18 @@ public class PotCookTask implements ICookTask {
     @Override
     public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder) {
         return ((PotRecipe) recipeHolder.value()).result();
+    }
+
+    @Override
+    public List<ItemStack> getCurrentInput(Level level, BlockPos pos) {
+        List<ItemStack> ans = new ArrayList<>();
+        if (level.getBlockEntity(pos) instanceof PotBlockEntity pot) {
+            ans.addAll(pot.getInputs().stream().dropWhile(ItemStack::isEmpty).toList());
+            if (level.getBlockState(pos).getValue(PotBlock.HAS_OIL))
+                ans.add(new ItemStack(ModItems.OIL.get()));
+        }
+
+        return ans;
     }
 
     @Override

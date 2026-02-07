@@ -10,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -26,6 +27,8 @@ public interface ICookTask {
     List<StackPredicate> getKitchenWares();
 
     ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder);
+
+    List<ItemStack> getCurrentInput(Level level, BlockPos pos);
 
     @Nullable
     BlockPos searchWorkBlock(ServerLevel level, EntityMaid maid, int horizontalSearchRange, int verticalSearchRange);

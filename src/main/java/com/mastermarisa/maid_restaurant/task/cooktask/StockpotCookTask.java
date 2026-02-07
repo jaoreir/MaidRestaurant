@@ -27,9 +27,11 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -73,6 +75,28 @@ public class StockpotCookTask implements ICookTask {
     @Override
     public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder) {
         return ((StockpotRecipe) recipeHolder.value()).result();
+    }
+
+    @Override
+    public List<ItemStack> getCurrentInput(Level level, BlockPos pos) {
+        List<ItemStack> ans = new ArrayList<>();
+        if (level.getBlockEntity(pos) instanceof StockpotBlockEntity pot) {
+            ans.addAll(pot.getInputs().stream().dropWhile(ItemStack::isEmpty).toList());
+            if (pot.getSoupBase() != null)
+                ans.add(pot.getSoupBase().getDisplayStack());
+            if (pot.getStatus() == 3) {
+                RecipeHolder<StockpotRecipe> holder = pot.recipe;
+                List<Ingredient> ingredients = holder.value().getIngredients().stream().dropWhile(Ingredient::isEmpty).dropWhile(Ingredient::hasNoItems).toList();
+                for (var item : ingredients)
+                    if (item.getItems().length > 0)
+                        ans.add(item.getItems()[0]);
+                for (int i = 0;i < holder.value().result().getCount() - pot.getTakeoutCount();i++)
+                    ans.add(holder.value().carrier().getItems()[0]);
+                ans.add(SoupBaseManager.getSoupBase(holder.value().soupBase()).getDisplayStack());
+            }
+        }
+
+        return ans;
     }
 
     @Override

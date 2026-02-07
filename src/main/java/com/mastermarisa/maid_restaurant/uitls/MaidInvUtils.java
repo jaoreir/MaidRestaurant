@@ -1,16 +1,16 @@
 package com.mastermarisa.maid_restaurant.uitls;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
+import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class MaidInvUtils {
     public static ItemStack tryGet(IItemHandler handler, StackPredicate filter) {
@@ -171,5 +171,81 @@ public class MaidInvUtils {
                 }
             }
         }
+    }
+
+    public static List<ItemStack> toStacks(IItemHandler itemHandler) {
+        List<ItemStack> ans = new ArrayList<>();
+        for (int i = 0;i < itemHandler.getSlots();i++)
+            if (!itemHandler.getStackInSlot(i).isEmpty())
+                ans.add(itemHandler.getStackInSlot(i));
+
+        return ans;
+    }
+
+    public static List<Pair<StackPredicate,Integer>> filterByCount(List<StackPredicate> required, List<ItemStack> handler, int count) {
+        LinkedList<ItemStack> stacks = new LinkedList<>();
+        for (var stack : handler)
+            if (!stack.isEmpty())
+                stacks.add(stack.copy());
+
+        int[] remain = new int[required.size()];
+        Arrays.fill(remain, count);
+
+        while (!stacks.isEmpty()) {
+            ItemStack stack = stacks.removeFirst();
+            for (int i = 0;i < required.size();i++) {
+                if (remain[i] > 0 && required.get(i).test(stack)) {
+                    if (remain[i] <= stack.getCount()) {
+                        stack.split(remain[i]);
+                        remain[i] = 0;
+                    } else {
+                        remain[i] -= stack.getCount();
+                        stack.split(stack.getCount());
+                    }
+                }
+            }
+        }
+
+        List<Pair<StackPredicate,Integer>> ans = new ArrayList<>();
+        for (int i = 0;i < required.size();i++)
+            if (remain[i] > 0)
+                ans.add(Pair.of(required.get(i),remain[i]));
+
+        return ans;
+    }
+
+    public static List<Pair<StackPredicate,Integer>> filterByCountStockpot(List<StackPredicate> required, List<ItemStack> handler, int count) {
+        LinkedList<ItemStack> stacks = new LinkedList<>();
+        for (var stack : handler)
+            if (!stack.isEmpty())
+                stacks.add(stack.copy());
+
+        int[] remain = new int[required.size()];
+        Arrays.fill(remain, count);
+        for (int i = 0;i < required.size();i++)
+            if (required.get(i).test(new ItemStack(Items.WATER_BUCKET)))
+                remain[i] = 2;
+
+        while (!stacks.isEmpty()) {
+            ItemStack stack = stacks.removeFirst();
+            for (int i = 0;i < required.size();i++) {
+                if (remain[i] > 0 && required.get(i).test(stack)) {
+                    if (remain[i] <= stack.getCount()) {
+                        stack.split(remain[i]);
+                        remain[i] = 0;
+                    } else {
+                        remain[i] -= stack.getCount();
+                        stack.split(stack.getCount());
+                    }
+                }
+            }
+        }
+
+        List<Pair<StackPredicate,Integer>> ans = new ArrayList<>();
+        for (int i = 0;i < required.size();i++)
+            if (remain[i] > 0)
+                ans.add(Pair.of(required.get(i),remain[i]));
+
+        return ans;
     }
 }

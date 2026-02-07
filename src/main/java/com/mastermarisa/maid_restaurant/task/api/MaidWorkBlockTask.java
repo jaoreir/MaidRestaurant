@@ -28,6 +28,7 @@ public class MaidWorkBlockTask extends MaidTickRateTask {
     protected void start(ServerLevel level, EntityMaid maid, long gameTime){
         BehaviorUtils.getTargetPos(maid).ifPresent((posTracker)-> {
             BlockUsageManager.addUser(posTracker.currentBlockPosition(),maid.getUUID());
+            BehaviorUtils.setCachedWorkBlock(maid, BehaviorUtils.getTargetPos(maid).get());
         });
     }
 

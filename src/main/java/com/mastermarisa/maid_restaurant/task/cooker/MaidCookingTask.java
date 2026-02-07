@@ -22,6 +22,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.Optional;
+
 public class MaidCookingTask extends MaidWorkBlockTask {
     public MaidCookingTask(){
         super(ImmutableMap.of(InitEntities.TARGET_POS.get(), MemoryStatus.VALUE_PRESENT),20);
@@ -33,6 +35,13 @@ public class MaidCookingTask extends MaidWorkBlockTask {
             PositionTracker tracker = BehaviorUtils.getTargetPos(maid).get();
             BlockPos pos = tracker.currentBlockPosition();
             Vec3 targetPos = tracker.currentPosition();
+
+            Optional<CookRequest> request = RequestManager.peekCookRequest(maid);
+            if (request.isPresent() && request.get().count <= 0) {
+                RequestManager.popCookRequest(maid);
+                RequestManager.postServeRequest(RequestManager.popServeRequest(maid).get());
+                return false;
+            }
 
             if (!maid.isPassenger()) return false;
             if (BlockUsageManager.getUserCount(pos) > 0 && !BlockUsageManager.isUsing(pos,maid.getUUID())) return false;
@@ -51,13 +60,8 @@ public class MaidCookingTask extends MaidWorkBlockTask {
         CookRequest request = RequestManager.peekCookRequest(maid).get();
         ICookTask iCookTask = RequestManager.getCurrentTask(maid).get();
 
-        if (request.count <= 0) {
-            RequestManager.popCookRequest(maid);
-            RequestManager.postServeRequest(RequestManager.popServeRequest(maid).get());
-            setNextTickCount(1);
-            return;
-        }
-
         iCookTask.cookTick(level,maid,pos,request);
     }
+
+
 }

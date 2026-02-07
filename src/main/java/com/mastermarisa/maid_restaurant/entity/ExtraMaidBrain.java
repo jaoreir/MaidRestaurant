@@ -10,6 +10,6 @@ import java.util.List;
 public class ExtraMaidBrain implements IExtraMaidBrain {
     @Override
     public List<MemoryModuleType<?>> getExtraMemoryTypes() {
-        return new ArrayList<>(List.of(InitEntities.TARGET_POS.get(),InitEntities.CHAIR_POS.get(),InitEntities.TARGET_TYPE.get()));
+        return new ArrayList<>(List.of(InitEntities.TARGET_POS.get(),InitEntities.CHAIR_POS.get(),InitEntities.TARGET_TYPE.get(),InitEntities.CACHED_WORK_BLOCK.get()));
     }
 }

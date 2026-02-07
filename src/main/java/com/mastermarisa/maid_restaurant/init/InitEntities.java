@@ -36,6 +36,9 @@ public interface InitEntities {
     DeferredHolder<MemoryModuleType<?>,MemoryModuleType<PositionTracker>> CHAIR_POS = MEMORY_MODULE_TYPES
             .register("chair_pos", () -> new MemoryModuleType<>(Optional.empty()));
 
+    DeferredHolder<MemoryModuleType<?>,MemoryModuleType<PositionTracker>> CACHED_WORK_BLOCK = MEMORY_MODULE_TYPES
+            .register("cached_work_block", () -> new MemoryModuleType<>(Optional.empty()));
+
     DeferredHolder<EntityType<?>,EntityType<SitEntity>> SIT_ENTITY = ENTITY_TYPES.register(
             "sit_entity", () -> SitEntity.TYPE
     );

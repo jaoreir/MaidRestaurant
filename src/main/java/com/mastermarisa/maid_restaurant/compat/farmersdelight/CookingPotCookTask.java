@@ -22,6 +22,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
@@ -72,6 +73,21 @@ public class CookingPotCookTask implements ICookTask {
             return recipeHolder.value().getResultItem(InitializationHelper.getServerCache().registryAccess());
         }
         return ItemStack.EMPTY;
+    }
+
+    @Override
+    public List<ItemStack> getCurrentInput(Level level, BlockPos pos) {
+        List<ItemStack> ans = new ArrayList<>();
+        if (level.getBlockEntity(pos) instanceof CookingPotBlockEntity pot) {
+            ItemStackHandler handler = pot.getInventory();
+            for (int i = 0;i < 6;i++)
+                if (!handler.getStackInSlot(i).isEmpty())
+                    ans.add(handler.getStackInSlot(i));
+            if (!handler.getStackInSlot(7).isEmpty())
+                ans.add(handler.getStackInSlot(7));
+        }
+
+        return ans;
     }
 
     @Override
