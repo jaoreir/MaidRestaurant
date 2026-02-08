@@ -21,6 +21,8 @@ import java.util.concurrent.CompletableFuture;
 public class TagItem extends ItemTagsProvider {
     public static final TagKey<Item> TABLE_BLACKLIST = ItemTags.create(ResourceLocation.fromNamespaceAndPath(MaidRestaurant.MOD_ID, "table_blacklist"));
 
+    public static final TagKey<Item> BASKET_BLACKLIST = ItemTags.create(ResourceLocation.fromNamespaceAndPath(MaidRestaurant.MOD_ID, "basket_blacklist"));
+
     public static final TagKey<Item> BRAISED_FISH_INGREDIENT = ItemTags.create(MaidRestaurant.resourceLocation("braised_fish_ingredient"));
 
     public TagItem(PackOutput pOutput, CompletableFuture<HolderLookup.Provider> pLookupProvider,
@@ -31,6 +33,9 @@ public class TagItem extends ItemTagsProvider {
     @Override
     protected void addTags(HolderLookup.Provider provider) {
         tag(TABLE_BLACKLIST)
+                .add(InitItems.ORDER_MENU.get());
+
+        tag(BASKET_BLACKLIST)
                 .add(InitItems.ORDER_MENU.get());
 
         tag(BRAISED_FISH_INGREDIENT)

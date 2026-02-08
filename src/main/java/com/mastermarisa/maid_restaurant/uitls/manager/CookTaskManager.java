@@ -2,6 +2,7 @@ package com.mastermarisa.maid_restaurant.uitls.manager;
 
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.task.cooktask.PotCookTask;
+import com.mastermarisa.maid_restaurant.task.cooktask.SteamerCookTask;
 import com.mastermarisa.maid_restaurant.task.cooktask.StockpotCookTask;
 import net.minecraft.world.item.crafting.RecipeType;
 
@@ -63,5 +64,6 @@ public class CookTaskManager {
         orderedTypes = new ArrayList<>();
         register(new StockpotCookTask());
         register(new PotCookTask());
+        register(new SteamerCookTask());
     }
 }

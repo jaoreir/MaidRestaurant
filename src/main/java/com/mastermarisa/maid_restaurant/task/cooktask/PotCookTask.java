@@ -1,20 +1,16 @@
 package com.mastermarisa.maid_restaurant.task.cooktask;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.github.tartaricacid.touhoulittlemaid.geckolib3.core.molang.util.PooledStringHashSet;
 import com.github.ysbbbbbb.kaleidoscopecookery.block.kitchen.PotBlock;
 import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.kitchen.PotBlockEntity;
-import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.kitchen.StockpotBlockEntity;
 import com.github.ysbbbbbb.kaleidoscopecookery.crafting.recipe.PotRecipe;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModItems;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModPoi;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModRecipes;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.tag.TagMod;
-import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.RecipeData;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
-import com.mastermarisa.maid_restaurant.mixin.PotBlockEntityAccessor;
 import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
 import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
 import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
@@ -76,7 +72,7 @@ public class PotCookTask implements ICookTask {
     }
 
     @Override
-    public List<ItemStack> getCurrentInput(Level level, BlockPos pos) {
+    public List<ItemStack> getCurrentInput(Level level, BlockPos pos, EntityMaid maid) {
         List<ItemStack> ans = new ArrayList<>();
         if (level.getBlockEntity(pos) instanceof PotBlockEntity pot) {
             ans.addAll(pot.getInputs().stream().dropWhile(ItemStack::isEmpty).toList());
@@ -170,8 +166,8 @@ public class PotCookTask implements ICookTask {
 
     private void tickState2(ServerLevel level, EntityMaid maid, BlockPos pos, PotBlockEntity pot, CookRequest request) {
         if (pot.hasCarrier()){
-            PotBlockEntityAccessor accessor = (PotBlockEntityAccessor) pot;
-            ItemStack carrier = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false),pot.getResult().getCount(),StackPredicate.of(accessor.getCarrier()),true);
+            PotRecipe recipe = RecipeUtils.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
+            ItemStack carrier = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false),pot.getResult().getCount(),StackPredicate.of(recipe.carrier()),true);
             if (!carrier.isEmpty()) {
                 pot.takeOutProduct(level,maid,carrier);
                 maid.swing(InteractionHand.OFF_HAND);

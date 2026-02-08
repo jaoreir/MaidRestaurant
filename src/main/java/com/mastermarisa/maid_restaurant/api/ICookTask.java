@@ -28,7 +28,7 @@ public interface ICookTask {
 
     ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder);
 
-    List<ItemStack> getCurrentInput(Level level, BlockPos pos);
+    List<ItemStack> getCurrentInput(Level level, BlockPos pos, EntityMaid maid);
 
     @Nullable
     BlockPos searchWorkBlock(ServerLevel level, EntityMaid maid, int horizontalSearchRange, int verticalSearchRange);

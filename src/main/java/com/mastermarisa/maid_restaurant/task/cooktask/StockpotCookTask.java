@@ -14,7 +14,7 @@ import com.github.ysbbbbbb.kaleidoscopecookery.util.ItemUtils;
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.RecipeData;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
-import com.mastermarisa.maid_restaurant.mixin.StockpotBlockEntityAccessor;
+import com.mastermarisa.maid_restaurant.uitls.FakePlayerUtils;
 import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
 import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
 import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
@@ -27,11 +27,13 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -78,7 +80,7 @@ public class StockpotCookTask implements ICookTask {
     }
 
     @Override
-    public List<ItemStack> getCurrentInput(Level level, BlockPos pos) {
+    public List<ItemStack> getCurrentInput(Level level, BlockPos pos, EntityMaid maid) {
         List<ItemStack> ans = new ArrayList<>();
         if (level.getBlockEntity(pos) instanceof StockpotBlockEntity pot) {
             ans.addAll(pot.getInputs().stream().dropWhile(ItemStack::isEmpty).toList());
@@ -153,10 +155,9 @@ public class StockpotCookTask implements ICookTask {
             if (soupBase.equals(ModSoupBases.WATER)) {
                 int count = MaidInvUtils.count(maid.getAvailableInv(false),StackPredicate.of(iSoupBase::isSoupBase));
                 if (count >= 2) {
-                    StockpotBlockEntityAccessor accessor = (StockpotBlockEntityAccessor) pot;
-                    accessor.setSoupBaseId(ModSoupBases.WATER);
-                    accessor.setStatus(1);
-                    pot.refresh();
+                    FakePlayer fakePlayer = FakePlayerUtils.getPlayer(level);
+                    pot.addSoupBase(level,fakePlayer,new ItemStack(Items.WATER_BUCKET));
+                    fakePlayer.getInventory().clearContent();
                     maid.swing(InteractionHand.OFF_HAND);
                     return;
                 }

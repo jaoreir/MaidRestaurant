@@ -24,7 +24,7 @@ public class StateManager {
                 if (cached.isPresent()) {
                     BlockPos pos = cached.get().currentBlockPosition();
                     if (BlockUsageManager.getUserCount(pos) <= 0 || BlockUsageManager.isUsing(pos,maid.getUUID()))
-                        handler.addAll(iCookTask.getCurrentInput(maid.level(),pos));
+                        handler.addAll(iCookTask.getCurrentInput(maid.level(),pos,maid));
                 }
                 return MaidInvUtils.getRequired(required,handler).isEmpty() ? CookState.COOK : CookState.STORAGE;
             }).orElse(CookState.IDLE)

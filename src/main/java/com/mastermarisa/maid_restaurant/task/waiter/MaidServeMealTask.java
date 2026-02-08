@@ -1,6 +1,7 @@
 package com.mastermarisa.maid_restaurant.task.waiter;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
+import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.decoration.FruitBasketBlockEntity;
 import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.decoration.TableBlockEntity;
 import com.google.common.collect.ImmutableMap;
 import com.mastermarisa.maid_restaurant.MaidRestaurant;
@@ -22,6 +23,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class MaidServeMealTask extends Behavior<EntityMaid> {
@@ -71,7 +73,15 @@ public class MaidServeMealTask extends Behavior<EntityMaid> {
             } else {
                 removeTargetTable(level,maid,pos,request);
             }
-        } else {
+        } else if (level.getBlockEntity(pos) instanceof FruitBasketBlockEntity basket) {
+            int pre = MaidInvUtils.count(maid.getAvailableInv(false),normalMeal);
+            MaidInvUtils.tryTakeFrom(maid.getAvailableInv(false),basket.getItems(),normalMeal,Math.min(request.toServe.getCount(),pre));
+            request.toServe.split(pre - MaidInvUtils.count(maid.getAvailableInv(false),normalMeal));
+            basket.setChanged();
+            basket.refresh();
+            removeTargetTable(level,maid,pos,request);
+        }
+        else {
             ItemStack meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false), 1, blockMeal, false);
             if (!meal.isEmpty())
                 serveBlockMeal(level,maid,request,pos,meal);

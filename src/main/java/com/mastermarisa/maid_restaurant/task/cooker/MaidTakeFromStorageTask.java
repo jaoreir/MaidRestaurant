@@ -40,32 +40,6 @@ public class MaidTakeFromStorageTask extends Behavior<EntityMaid> {
         return BehaviorUtils.getType(maid) == TargetType.STORAGE_BLOCK.type && maid.distanceToSqr(BehaviorUtils.getTargetPos(maid).get().currentPosition()) <= Math.pow(closeEnoughDist,2.0D);
     }
 
-//    protected void start(ServerLevel level, EntityMaid maid, long gameTimeIn) {
-//        BlockPos pos = BehaviorUtils.getTargetPos(maid).get().currentBlockPosition();
-//        BlockState state = level.getBlockState(pos);
-//
-//        BehaviorUtils.eraseTargetPos(maid);
-//
-//        if (StateManager.cookState(maid) != StateManager.CookState.STORAGE) return;
-//        if (!state.is(TagBlock.STORAGE_BLOCK)) return;
-//        BlockEntity blockEntity = level.getBlockEntity(pos);
-//        if (blockEntity == null) return;
-//        IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, level.getBlockState(pos), blockEntity, null);
-//        if (handler == null) return;
-//
-//        CookRequest request = RequestManager.peekCookRequest(maid).get();
-//        ICookTask iCookTask = RequestManager.getCurrentTask(maid).get();
-//        List<StackPredicate> required = iCookTask.getIngredients(RecipeUtils.byKeyTyped(request.type,request.id));
-//        for (StackPredicate predicate : required) {
-//            int count = MaidInvUtils.count(maid.getAvailableInv(false),predicate);
-//            if (count < 16) {
-//                MaidInvUtils.tryTakeFrom(handler,maid.getAvailableInv(false),predicate,16 - count);
-//            }
-//        }
-//        CheckRateManager.setNextCheckTick(maid.getUUID() + MaidSearchWorkBlockTask.UID,5);
-//        CheckRateManager.setNextCheckTick(maid.getUUID() + MaidSearchStorageTask.UID,5);
-//    }
-
     protected void start(ServerLevel level, EntityMaid maid, long gameTimeIn) {
         BlockPos pos = BehaviorUtils.getTargetPos(maid).get().currentBlockPosition();
         BlockState state = level.getBlockState(pos);
@@ -87,7 +61,7 @@ public class MaidTakeFromStorageTask extends Behavior<EntityMaid> {
         if (cached.isPresent()) {
             BlockPos p = cached.get().currentBlockPosition();
             if (BlockUsageManager.getUserCount(p) <= 0 || BlockUsageManager.isUsing(p,maid.getUUID()))
-                stacks.addAll(iCookTask.getCurrentInput(maid.level(),p));
+                stacks.addAll(iCookTask.getCurrentInput(maid.level(),p,maid));
         }
         List<Pair<StackPredicate,Integer>> filtered;
         if (iCookTask.getType().equals(ModRecipes.STOCKPOT_RECIPE))

@@ -89,7 +89,7 @@ public class MaidSearchStorageTask extends MaidCheckRateTask {
         if (cached.isPresent()) {
             BlockPos pos = cached.get().currentBlockPosition();
             if (BlockUsageManager.getUserCount(pos) <= 0 || BlockUsageManager.isUsing(pos,maid.getUUID()))
-                handler.addAll(iCookTask.getCurrentInput(maid.level(),pos));
+                handler.addAll(iCookTask.getCurrentInput(maid.level(),pos,maid));
         }
         List<Pair<StackPredicate,Integer>> filtered;
         if (iCookTask.getType().equals(ModRecipes.STOCKPOT_RECIPE))

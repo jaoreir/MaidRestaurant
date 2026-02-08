@@ -28,14 +28,16 @@ public class TagBlock extends BlockTagsProvider {
     @Override
     protected void addTags(HolderLookup.@NotNull Provider provider){
         tag(STORAGE_BLOCK)
-                .add(Blocks.CHEST);
+                .add(Blocks.CHEST)
+                .add(Blocks.BARREL);
 
         getOrCreateRawBuilder(SIT_BLOCK)
                 .addOptionalTag(ResourceLocation.fromNamespaceAndPath(KaleidoscopeCookery.MOD_ID,"cook_stool"))
                 .addOptionalTag(ResourceLocation.fromNamespaceAndPath(KaleidoscopeCookery.MOD_ID,"chair"));
 
         getOrCreateRawBuilder(SERVE_MEAL_BLOCK)
-                .addOptionalTag(ResourceLocation.fromNamespaceAndPath(KaleidoscopeCookery.MOD_ID,"table"));
+                .addOptionalTag(ResourceLocation.fromNamespaceAndPath(KaleidoscopeCookery.MOD_ID,"table"))
+                .addOptionalElement(ResourceLocation.fromNamespaceAndPath(KaleidoscopeCookery.MOD_ID,"fruit_basket"));
     }
 
     @Override
