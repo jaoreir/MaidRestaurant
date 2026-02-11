@@ -10,9 +10,7 @@ public interface InitEvents {
         bus.register(RequestDistributor.class);
         bus.register(OnEntityInteract.class);
         bus.register(BlockSelector.class);
-        bus.register(OnAddReloadListeners.class);
         bus.register(OnServerAboutToStart.class);
         bus.register(OnMaidTaskEnable.class);
-        bus.register(OnPlayerLoggedIn.class);
     }
 }

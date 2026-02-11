@@ -1,23 +1,20 @@
-package com.mastermarisa.maid_restaurant.uitls.manager;
+package com.mastermarisa.maid_restaurant.uitls;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.mastermarisa.maid_restaurant.api.ICookTask;
-import com.mastermarisa.maid_restaurant.uitls.BehaviorUtils;
-import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
-import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 import java.util.Optional;
 
 public class StateManager {
-    public static CookState cookState(EntityMaid maid) {
+    public static CookState cookState(EntityMaid maid, Level level) {
         return RequestManager.peekCookRequest(maid).map(request ->
             CookTaskManager.getTask(request.type).map(iCookTask -> {
-                List<StackPredicate> required = iCookTask.getIngredients(RecipeUtils.byKeyTyped(iCookTask.getType(),request.id));
+                List<StackPredicate> required = iCookTask.getIngredients(level.getRecipeManager().byKeyTyped(iCookTask.getType(),request.id));
                 required.addAll(iCookTask.getKitchenWares());
                 List<ItemStack> handler = MaidInvUtils.toStacks(maid.getAvailableInv(false));
                 Optional<PositionTracker> cached = BehaviorUtils.getCachedWorkBlock(maid);

@@ -1,21 +1,15 @@
 package com.mastermarisa.maid_restaurant.compat.farmersdelight;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.github.ysbbbbbb.kaleidoscopecookery.crafting.recipe.StockpotRecipe;
-import com.github.ysbbbbbb.kaleidoscopecookery.crafting.soupbase.SoupBaseManager;
-import com.github.ysbbbbbb.kaleidoscopecookery.init.ModRecipes;
 import com.github.ysbbbbbb.kaleidoscopecookery.util.ItemUtils;
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.RecipeData;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
 import com.mastermarisa.maid_restaurant.uitls.BlockPosUtils;
 import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
-import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
-import com.mastermarisa.maid_restaurant.uitls.manager.BlockUsageManager;
-import com.mastermarisa.maid_restaurant.uitls.manager.CookTaskManager;
-import com.mastermarisa.maid_restaurant.uitls.manager.InitializationHelper;
-import net.minecraft.client.Minecraft;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.BlockUsageManager;
+import com.mastermarisa.maid_restaurant.uitls.CookTaskManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -24,9 +18,6 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 import vectorwing.farmersdelight.common.block.entity.CookingPotBlockEntity;
@@ -64,16 +55,6 @@ public class CookingPotCookTask implements ICookTask {
     @Override
     public List<StackPredicate> getKitchenWares() {
         return List.of();
-    }
-
-    @Override
-    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder) {
-        if (FMLEnvironment.dist == Dist.CLIENT && Minecraft.getInstance().level != null) {
-            return recipeHolder.value().getResultItem(Minecraft.getInstance().level.registryAccess());
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-            return recipeHolder.value().getResultItem(InitializationHelper.getServerCache().registryAccess());
-        }
-        return ItemStack.EMPTY;
     }
 
     @Override
@@ -118,9 +99,9 @@ public class CookingPotCookTask implements ICookTask {
         ItemStack meal = pot.getMeal();
         ItemStack container = handler.getStackInSlot(7);
         ItemStack result = handler.getStackInSlot(8);
-        RecipeHolder<? extends Recipe<?>> holder = RecipeUtils.byKeyTyped(request.type,request.id);
+        RecipeHolder<? extends Recipe<?>> holder = level.getRecipeManager().byKeyTyped(request.type,request.id);
         CookingPotRecipe recipe = (CookingPotRecipe) holder.value();
-        if (!result.isEmpty() && result.is(getResult(holder).getItem())) {
+        if (!result.isEmpty() && result.is(getResult(holder,level).getItem())) {
             if (result.getCount() >= request.count) {
                 ItemUtils.getItemToLivingEntity(maid,handler.extractItem(8,request.count,false));
                 request.count = 0;
@@ -150,16 +131,11 @@ public class CookingPotCookTask implements ICookTask {
     }
 
     @Override
-    public List<RecipeData> getAllRecipeData() {
-        RecipeManager manager = RecipeUtils.getRecipeManager();
+    public List<RecipeData> getAllRecipeData(Level level) {
+        RecipeManager manager = level.getRecipeManager();
         List<RecipeData> ans = new ArrayList<>();
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            manager = Minecraft.getInstance().level.getRecipeManager();
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-            manager = RecipeUtils.getRecipeManager();
-        }
         for (var holder : manager.getAllRecipesFor(ModRecipeTypes.COOKING.get())) {
-            ans.add(new RecipeData(holder.id(),ModRecipeTypes.COOKING.get(),getIcon(),getResult(holder)));
+            ans.add(new RecipeData(holder.id(),ModRecipeTypes.COOKING.get(),getIcon(),getResult(holder,level)));
         }
 
         return ans;

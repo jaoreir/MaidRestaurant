@@ -1,7 +1,6 @@
 package com.mastermarisa.maid_restaurant.client.gui.screen.cook_request;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.client.gui.element.UIContainerHorizontal;
 import com.mastermarisa.maid_restaurant.client.gui.element.UIElement;
 import com.mastermarisa.maid_restaurant.client.gui.element.UIImage;
@@ -10,8 +9,7 @@ import com.mastermarisa.maid_restaurant.entity.attachment.CookRequestQueue;
 import com.mastermarisa.maid_restaurant.entity.attachment.ServeRequestQueue;
 import com.mastermarisa.maid_restaurant.init.UIConst;
 import com.mastermarisa.maid_restaurant.network.CancelRequestPayload;
-import com.mastermarisa.maid_restaurant.uitls.manager.CookTaskManager;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.CookTaskManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -43,6 +41,7 @@ public class CookRequestScreen extends Screen {
 
     public CookRequestScreen(EntityMaid maid) {
         super(Component.empty());
+        CookTaskManager.register();
         this.maid = maid;
         this.band = new UIImage(UIConst.bandImage);
         this.requests = new UIContainerHorizontal(new Rectangle(0,0), UIContainerHorizontal.ElementAlignment.LEFT);
@@ -88,7 +87,7 @@ public class CookRequestScreen extends Screen {
             for (Iterator<CookRequest> it = cookRequestQueue.iterator(); it.hasNext(); ) {
                 CookRequest request = it.next();
                 if (checkAvailability()) {
-                    tags.add(new UICookRequest(request, CookTaskManager.getTask(request.type).get()));
+                    tags.add(new UICookRequest(request, CookTaskManager.getTask(request.type).get(),maid.level()));
                 }
             }
             requests = UIContainerHorizontal.wrap(tags,3,0, UIContainerHorizontal.ElementAlignment.LEFT);

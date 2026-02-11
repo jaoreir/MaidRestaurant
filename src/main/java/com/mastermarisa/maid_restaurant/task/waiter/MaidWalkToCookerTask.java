@@ -7,7 +7,7 @@ import com.mastermarisa.maid_restaurant.task.TaskCooker;
 import com.mastermarisa.maid_restaurant.task.api.MaidTickRateTask;
 import com.mastermarisa.maid_restaurant.uitls.BehaviorUtils;
 import com.mastermarisa.maid_restaurant.uitls.TargetType;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.RequestManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 

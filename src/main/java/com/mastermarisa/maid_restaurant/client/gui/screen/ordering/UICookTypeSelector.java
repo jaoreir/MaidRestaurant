@@ -4,7 +4,7 @@ import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.api.gui.IPageable;
 import com.mastermarisa.maid_restaurant.client.gui.element.*;
 import com.mastermarisa.maid_restaurant.init.UIConst;
-import com.mastermarisa.maid_restaurant.uitls.manager.CookTaskManager;
+import com.mastermarisa.maid_restaurant.uitls.CookTaskManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.crafting.RecipeType;
 

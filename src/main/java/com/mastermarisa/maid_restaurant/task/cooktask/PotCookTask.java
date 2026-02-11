@@ -12,10 +12,8 @@ import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.RecipeData;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
 import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
-import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
-import com.mastermarisa.maid_restaurant.uitls.manager.BlockUsageManager;
-import net.minecraft.client.Minecraft;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.BlockUsageManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
@@ -28,8 +26,6 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -71,7 +67,7 @@ public class PotCookTask implements ICookTask {
     }
 
     @Override
-    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder) {
+    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
         return ((PotRecipe) recipeHolder.value()).result();
     }
 
@@ -121,14 +117,9 @@ public class PotCookTask implements ICookTask {
     }
 
     @Override
-    public List<RecipeData> getAllRecipeData() {
-        RecipeManager manager = RecipeUtils.getRecipeManager();
+    public List<RecipeData> getAllRecipeData(Level level) {
+        RecipeManager manager = level.getRecipeManager();
         List<RecipeData> ans = new ArrayList<>();
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            manager = Minecraft.getInstance().level.getRecipeManager();
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-            manager = RecipeUtils.getRecipeManager();
-        }
         for (var holder : manager.getAllRecipesFor(ModRecipes.POT_RECIPE)) {
             if (!blackList.contains(holder.id().toString()))
                 ans.add(new RecipeData(holder.id(),ModRecipes.POT_RECIPE,getIcon(),holder.value().result()));
@@ -145,7 +136,7 @@ public class PotCookTask implements ICookTask {
                 maid.swing(InteractionHand.OFF_HAND);
             }
         } else {
-            PotRecipe recipe = RecipeUtils.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
+            PotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
             List<StackPredicate> required = new ArrayList<>(recipe.ingredients().stream().filter(s->!s.isEmpty()).map(StackPredicate::new).toList());
             required = MaidInvUtils.getRequired(required,pot.getInputs());
             if (required.isEmpty()) {
@@ -176,7 +167,7 @@ public class PotCookTask implements ICookTask {
 
     private void tickState2(ServerLevel level, EntityMaid maid, BlockPos pos, PotBlockEntity pot, CookRequest request) {
         if (pot.hasCarrier()){
-            PotRecipe recipe = RecipeUtils.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
+            PotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
             ItemStack carrier = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false),pot.getResult().getCount(),StackPredicate.of(recipe.carrier()),true);
             if (!carrier.isEmpty()) {
                 pot.takeOutProduct(level,maid,carrier);

@@ -9,8 +9,7 @@ import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequestQueue;
 import com.mastermarisa.maid_restaurant.entity.attachment.ServeRequestQueue;
 import com.mastermarisa.maid_restaurant.uitls.BlockPosUtils;
-import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.RequestManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
@@ -58,15 +57,15 @@ public class NetWorkHandler {
 
         for (int i = 0;i < IDs.length;i++) {
             CookRequest request = new CookRequest(IDs[i],types[i],counts[i]);
-            for (CookRequest item : tryMap(request))
+            for (CookRequest item : tryMap(context.player().level(),request))
                 RequestManager.postCookRequest(item, BlockPosUtils.unpack(tables));
         }
     }
 
-    private static List<CookRequest> tryMap(CookRequest request) {
+    private static List<CookRequest> tryMap(Level level, CookRequest request) {
         List<CookRequest> ans = new ArrayList<>(List.of(request));
         if (request.is(ModRecipes.POT_RECIPE)) {
-            PotRecipe recipe = RecipeUtils.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
+            PotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.POT_RECIPE,request.id).value();
             if (recipe.result().is(ModItems.MEAT_PIE) && recipe.result().getCount() != 9) {
                 int count = recipe.result().getCount() * request.count;
                 if (count != 1) ans.clear();
@@ -85,7 +84,7 @@ public class NetWorkHandler {
                     ans.add(new CookRequest(ResourceLocation.parse("kaleidoscope_cookery:pot/egg_to_fried_egg_" + count % 9),request.type,1));
             }
         } else if (request.is(ModRecipes.STOCKPOT_RECIPE)) {
-            StockpotRecipe recipe = RecipeUtils.getRecipeManager().byKeyTyped(ModRecipes.STOCKPOT_RECIPE,request.id).value();
+            StockpotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STOCKPOT_RECIPE,request.id).value();
             if (recipe.result().is(ModItems.DUMPLING) && recipe.result().getCount() != 9) {
                 int count = recipe.result().getCount() * request.count;
                 if (count != 1) ans.clear();

@@ -1,4 +1,4 @@
-package com.mastermarisa.maid_restaurant.uitls.manager;
+package com.mastermarisa.maid_restaurant.uitls;
 
 import net.minecraft.util.RandomSource;
 

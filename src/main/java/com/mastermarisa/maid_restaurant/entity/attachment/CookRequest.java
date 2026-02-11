@@ -1,6 +1,6 @@
 package com.mastermarisa.maid_restaurant.entity.attachment;
 
-import com.mastermarisa.maid_restaurant.uitls.manager.CookTaskManager;
+import com.mastermarisa.maid_restaurant.uitls.CookTaskManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeType;
 

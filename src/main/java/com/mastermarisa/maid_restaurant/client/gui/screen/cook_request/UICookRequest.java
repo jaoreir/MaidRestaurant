@@ -7,10 +7,10 @@ import com.mastermarisa.maid_restaurant.client.gui.element.UIItemStack;
 import com.mastermarisa.maid_restaurant.client.gui.element.UILabel;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
 import com.mastermarisa.maid_restaurant.init.UIConst;
-import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -22,12 +22,12 @@ public class UICookRequest extends UIElement {
     protected final UIItemStack result;
     protected final UILabel count;
 
-    public UICookRequest(CookRequest request, ICookTask iCookTask) {
+    public UICookRequest(CookRequest request, ICookTask iCookTask, Level level) {
         super(new Rectangle(18,70));
         bg = new UIImage(UIConst.requestImage);
-        RecipeHolder<? extends Recipe<?>> holder = RecipeUtils.byKeyTyped(request.type,request.id);
-        result = new UIItemStack(iCookTask.getResult(holder));
-        count = new UILabel(String.valueOf(iCookTask.getResult(holder).getCount() * request.requestedCount),UIConst.lessBlack);
+        RecipeHolder<? extends Recipe<?>> holder = level.getRecipeManager().byKeyTyped(request.type,request.id);
+        result = new UIItemStack(iCookTask.getResult(holder,level));
+        count = new UILabel(String.valueOf(iCookTask.getResult(holder,level).getCount() * request.requestedCount),UIConst.lessBlack);
         children = new ArrayList<>(List.of(bg,result,count));
     }
 

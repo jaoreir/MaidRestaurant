@@ -1,4 +1,4 @@
-package com.mastermarisa.maid_restaurant.uitls.manager;
+package com.mastermarisa.maid_restaurant.uitls;
 
 import com.github.tartaricacid.touhoulittlemaid.geckolib3.core.molang.util.PooledStringHashSet;
 import com.github.tartaricacid.touhoulittlemaid.geckolib3.core.molang.util.StringPool;

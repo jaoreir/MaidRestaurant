@@ -3,6 +3,7 @@ package com.mastermarisa.maid_restaurant.item;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.OrderingScreen;
 import com.mastermarisa.maid_restaurant.data.TagBlock;
 import com.mastermarisa.maid_restaurant.entity.attachment.BlockSelection;
+import com.mastermarisa.maid_restaurant.uitls.BehaviorUtils;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -26,8 +27,8 @@ public class OrderMenuItem extends Item {
         BlockPos pos = context.getClickedPos();
         Player player = context.getPlayer();
 
-        if (player != null && !player.isSecondaryUseActive() && level.getBlockState(pos).is(TagBlock.SERVE_MEAL_BLOCK))
-            return InteractionResult.FAIL;
+        if (player != null && BehaviorUtils.isValidServeBlock(level,pos))
+            return InteractionResult.SUCCESS_NO_ITEM_USED;
 
         return super.useOn(context);
     }
@@ -35,7 +36,7 @@ public class OrderMenuItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
         BlockSelection selection = player.getData(BlockSelection.TYPE);
-        if (!selection.selected.isEmpty()) {
+        if (!player.isSecondaryUseActive() && !selection.selected.isEmpty()) {
             if (level.isClientSide()) {
                 OrderingScreen.open(player,selection.selected);
             }

@@ -1,6 +1,9 @@
 {
   "values": [
     "minecraft:chest",
-    "minecraft:barrel"
+    "minecraft:barrel",
+    "create:depot",
+    "create:belt",
+    "create:weighted_ejector"
   ]
 }

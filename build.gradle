@@ -14,6 +14,8 @@ group = mod_group_id
 
 repositories.clear()
 repositories {
+    maven { url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/" }
+    maven { url = "https://maven.createmod.net" }
     maven {url = "https://maven.aliyun.com/repository/public"}
     maven {url = "https://libraries.minecraft.net/"}
     maven {url = "https://neoforged.forgecdn.net/releases"}
@@ -85,6 +87,9 @@ dependencies {
     implementation "curse.maven:touhou-little-maid-355044:7510722"
     implementation "curse.maven:kaleidoscope-cookery-1309203:7473813"
     implementation "curse.maven:farmers-delight-398521:6917256"
+    implementation "curse.maven:create-328085:7178775"
+    implementation("net.createmod.ponder:Ponder-NeoForge-${minecraft_version}:${ponder_version}")
+    compileOnly("dev.engine-room.flywheel:flywheel-neoforge-api-${flywheel_minecraft_version}:${flywheel_version}")
     compileOnly "curse.maven:irisshaders-455508:6661598"
 }
 

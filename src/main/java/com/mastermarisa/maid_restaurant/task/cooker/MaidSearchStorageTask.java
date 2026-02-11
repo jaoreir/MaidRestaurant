@@ -4,14 +4,17 @@ import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.github.ysbbbbbb.kaleidoscopecookery.init.ModRecipes;
 import com.google.common.collect.ImmutableMap;
 import com.mastermarisa.maid_restaurant.api.ICookTask;
-import com.mastermarisa.maid_restaurant.data.TagBlock;
+import com.mastermarisa.maid_restaurant.api.IStorageType;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
 import com.mastermarisa.maid_restaurant.init.InitEntities;
 import com.mastermarisa.maid_restaurant.task.api.MaidCheckRateTask;
+import com.mastermarisa.maid_restaurant.task.storage.TableStorage;
 import com.mastermarisa.maid_restaurant.uitls.*;
-import com.mastermarisa.maid_restaurant.uitls.manager.BlockUsageManager;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
-import com.mastermarisa.maid_restaurant.uitls.manager.StateManager;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.BlockUsageManager;
+import com.mastermarisa.maid_restaurant.uitls.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.StateManager;
+import com.mastermarisa.maid_restaurant.uitls.StorageTypeManager;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
@@ -19,9 +22,6 @@ import net.minecraft.world.entity.ai.behavior.BlockPosTracker;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.*;
@@ -39,7 +39,7 @@ public class MaidSearchStorageTask extends MaidCheckRateTask {
 
     @Override
     protected boolean checkExtraStartConditions(ServerLevel level, EntityMaid maid){
-        return super.checkExtraStartConditions(level,maid) && StateManager.cookState(maid) == StateManager.CookState.STORAGE
+        return super.checkExtraStartConditions(level,maid) && StateManager.cookState(maid,level) == StateManager.CookState.STORAGE
                 && search(level,maid);
     }
 
@@ -57,16 +57,9 @@ public class MaidSearchStorageTask extends MaidCheckRateTask {
         BlockPos center = BehaviorUtils.getSearchPos(maid);
         int searchRange = (int)maid.getRestrictRadius();
         List<BlockPos> foundStorages = BlockPosUtils.search(center,searchRange,verticalSearchRange,(pos)->{
-            BlockState state = level.getBlockState(pos);
-            if (state.is(TagBlock.STORAGE_BLOCK)){
-                BlockEntity blockEntity = level.getBlockEntity(pos);
-                if (blockEntity != null){
-                    IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos, level.getBlockState(pos), blockEntity, null);
-                    return handler != null && containsRequired(maid,handler)
-                            && !BlockPosUtils.getAllRelativeGround(level,pos,1).stream().filter(maid::canPathReach).toList().isEmpty();
-                }
-            }
-            return false;
+            IItemHandler handler = StorageTypeManager.tryGetHandler(level,pos);
+            return handler != null && containsRequired(level,maid,handler)
+                    && !BlockPosUtils.getAllRelativeGround(level,pos,1).stream().filter(maid::canPathReach).toList().isEmpty();
         });
 
         return foundStorages.stream().min(Comparator.comparingDouble(p->p.distSqr(maid.blockPosition()))).map(pos->{
@@ -80,10 +73,10 @@ public class MaidSearchStorageTask extends MaidCheckRateTask {
         }).orElse(false);
     }
 
-    protected boolean containsRequired(EntityMaid maid, IItemHandler itemHandler) {
+    protected boolean containsRequired(ServerLevel level, EntityMaid maid, IItemHandler itemHandler) {
         ICookTask iCookTask = RequestManager.getCurrentTask(maid).get();
         CookRequest request = RequestManager.peekCookRequest(maid).get();
-        List<StackPredicate> required = iCookTask.getIngredients(RecipeUtils.byKeyTyped(request.type,request.id));
+        List<StackPredicate> required = iCookTask.getIngredients(level.getRecipeManager().byKeyTyped(request.type,request.id));
         List<ItemStack> handler = MaidInvUtils.toStacks(maid.getAvailableInv(false));
         Optional<PositionTracker> cached = BehaviorUtils.getCachedWorkBlock(maid);
         if (cached.isPresent()) {

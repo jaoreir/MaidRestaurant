@@ -1,14 +1,17 @@
 package com.mastermarisa.maid_restaurant.uitls;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
+import com.mastermarisa.maid_restaurant.api.IStorageType;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
 import it.unimi.dsi.fastutil.Pair;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
 
 import java.util.*;
 
@@ -168,6 +171,29 @@ public class MaidInvUtils {
                     toInsert = ItemHandlerHelper.insertItemStacked(to,toInsert,false);
                     count -= stack.getCount() - toInsert.getCount();
                     stack.split(stack.getCount() - toInsert.getCount());
+                }
+            }
+        }
+    }
+
+    public static void tryTakeFrom(ServerLevel level, BlockPos pos, IStorageType iStorageType, IItemHandler to, StackPredicate predicate, int count) {
+        if (!iStorageType.isValid(level,pos)) return;
+        IItemHandler handler = iStorageType.getHandler(level,pos);
+        if (handler == null) return;
+        for (int i = 0;i < handler.getSlots() && count > 0;i++) {
+            ItemStack stack = handler.getStackInSlot(i);
+            if (predicate.test(stack)) {
+                if (stack.getCount() > count) {
+                    ItemStack remainder = stack.copyWithCount(count);
+                    remainder = ItemHandlerHelper.insertItemStacked(to,remainder,true);
+                    ItemStack toInsert = iStorageType.extract(level,pos,i,count - remainder.getCount(),false);
+                    ItemHandlerHelper.insertItemStacked(to,toInsert,false);
+                    break;
+                } else {
+                    ItemStack remainder = stack.copyWithCount(count);
+                    remainder = ItemHandlerHelper.insertItemStacked(to,remainder,true);
+                    ItemStack toInsert = iStorageType.extract(level,pos,i,stack.getCount() - remainder.getCount(),false);
+                    count -= toInsert.getCount() - ItemHandlerHelper.insertItemStacked(to,toInsert,false).getCount();
                 }
             }
         }

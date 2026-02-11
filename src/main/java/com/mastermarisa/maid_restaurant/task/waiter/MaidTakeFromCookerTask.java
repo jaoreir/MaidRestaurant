@@ -7,11 +7,12 @@ import com.mastermarisa.maid_restaurant.init.InitEntities;
 import com.mastermarisa.maid_restaurant.task.TaskCooker;
 import com.mastermarisa.maid_restaurant.uitls.BehaviorUtils;
 import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
 import com.mastermarisa.maid_restaurant.uitls.TargetType;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.RequestManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 
 public class MaidTakeFromCookerTask extends Behavior<EntityMaid> {
@@ -40,5 +41,6 @@ public class MaidTakeFromCookerTask extends Behavior<EntityMaid> {
         }
 
         BehaviorUtils.eraseTargetPos(maid);
+        maid.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
     }
 }

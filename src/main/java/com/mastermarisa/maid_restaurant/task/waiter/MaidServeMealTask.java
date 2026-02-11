@@ -5,24 +5,24 @@ import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.decoration.FruitBaske
 import com.github.ysbbbbbb.kaleidoscopecookery.blockentity.decoration.TableBlockEntity;
 import com.google.common.collect.ImmutableMap;
 import com.mastermarisa.maid_restaurant.MaidRestaurant;
+import com.mastermarisa.maid_restaurant.api.IStorageType;
 import com.mastermarisa.maid_restaurant.data.TagBlock;
 import com.mastermarisa.maid_restaurant.entity.attachment.ServeRequest;
 import com.mastermarisa.maid_restaurant.init.InitEntities;
-import com.mastermarisa.maid_restaurant.uitls.BehaviorUtils;
-import com.mastermarisa.maid_restaurant.uitls.DirectionUtils;
-import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.*;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.behavior.Behavior;
+import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
@@ -46,46 +46,60 @@ public class MaidServeMealTask extends Behavior<EntityMaid> {
         StackPredicate normalMeal = StackPredicate.of(request.toServe.getItem());
 
         BehaviorUtils.eraseTargetPos(maid);
+        maid.getBrain().eraseMemory(MemoryModuleType.WALK_TARGET);
 
-        if (!(state.is(TagBlock.SERVE_MEAL_BLOCK) && level.getBlockState(pos.above()).canBeReplaced())) {
+        if (!BehaviorUtils.isValidServeBlock(level,pos)) {
             removeTargetTable(level,maid,pos,request);
             return;
         }
 
-        if (level.getBlockEntity(pos) instanceof TableBlockEntity table) {
-            ItemStackHandler tableItems = table.getItems();
-            int count = getEmptySlots(tableItems);
+        if (state.is(TagBlock.SERVE_MEAL_BLOCK)) {
+            if (level.getBlockEntity(pos) instanceof TableBlockEntity table) {
+                ItemStackHandler tableItems = table.getItems();
+                int count = getEmptySlots(tableItems);
 
-            if (count == tableItems.getSlots()) {
-                ItemStack meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false), 1, blockMeal, false);
-                if (!meal.isEmpty()) {
-                    serveBlockMeal(level,maid,request,pos,meal);
-                } else {
-                    meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false), Math.min(request.toServe.getCount(),tableItems.getSlots()), normalMeal, false);
+                if (count == tableItems.getSlots()) {
+                    ItemStack meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false), 1, blockMeal, false);
                     if (!meal.isEmpty()) {
-                        serveMealItemToTable(level,maid,request,pos,table,meal);
+                        serveBlockMeal(level,maid,request,pos,meal);
+                    } else {
+                        meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false), Math.min(request.toServe.getCount(),tableItems.getSlots()), normalMeal, false);
+                        if (!meal.isEmpty()) {
+                            serveMealItemToTable(level,maid,request,pos,table,meal);
+                        }
                     }
+                } else if (count > 0) {
+                    ItemStack meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false),Math.min(request.toServe.getCount(),count),normalMeal,false);
+                    if (!meal.isEmpty())
+                        serveMealItemToTable(level,maid,request,pos,table,meal);
+                } else {
+                    removeTargetTable(level,maid,pos,request);
                 }
-            } else if (count > 0) {
-                ItemStack meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false),Math.min(request.toServe.getCount(),count),normalMeal,false);
-                if (!meal.isEmpty())
-                    serveMealItemToTable(level,maid,request,pos,table,meal);
-            } else {
+            } else if (level.getBlockEntity(pos) instanceof FruitBasketBlockEntity basket) {
+                int pre = MaidInvUtils.count(maid.getAvailableInv(false),normalMeal);
+                MaidInvUtils.tryTakeFrom(maid.getAvailableInv(false),basket.getItems(),normalMeal,Math.min(request.toServe.getCount(),pre));
+                request.toServe.split(pre - MaidInvUtils.count(maid.getAvailableInv(false),normalMeal));
+                basket.setChanged();
+                basket.refresh();
                 removeTargetTable(level,maid,pos,request);
             }
-        } else if (level.getBlockEntity(pos) instanceof FruitBasketBlockEntity basket) {
-            int pre = MaidInvUtils.count(maid.getAvailableInv(false),normalMeal);
-            MaidInvUtils.tryTakeFrom(maid.getAvailableInv(false),basket.getItems(),normalMeal,Math.min(request.toServe.getCount(),pre));
-            request.toServe.split(pre - MaidInvUtils.count(maid.getAvailableInv(false),normalMeal));
-            basket.setChanged();
-            basket.refresh();
+            else {
+                ItemStack meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false), 1, blockMeal, false);
+                if (!meal.isEmpty())
+                    serveBlockMeal(level,maid,request,pos,meal);
+            }
+        } else {
+            IStorageType iStorageType = StorageTypeManager.tryGetType(level,pos);
+            if (iStorageType == null) return;
+            ItemStack remainder = request.toServe.copy();
+            remainder = iStorageType.insert(level,pos,remainder,true);
+            ItemStack toInsert = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false),request.toServe.getCount() - remainder.getCount(),normalMeal,false);
+            request.toServe.split(toInsert.getCount());
+            iStorageType.insert(level,pos,toInsert,false);
             removeTargetTable(level,maid,pos,request);
         }
-        else {
-            ItemStack meal = MaidInvUtils.tryExtractSingleSlot(maid.getAvailableInv(false), 1, blockMeal, false);
-            if (!meal.isEmpty())
-                serveBlockMeal(level,maid,request,pos,meal);
-        }
+
+
         MaidRestaurant.LOGGER.debug("Count:" + request.toServe.getCount());
     }
 

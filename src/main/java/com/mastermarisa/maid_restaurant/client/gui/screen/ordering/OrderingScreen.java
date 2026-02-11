@@ -6,7 +6,7 @@ import com.mastermarisa.maid_restaurant.client.gui.element.*;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.elements.UIConfirmTag;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.elements.UIOrderTag;
 import com.mastermarisa.maid_restaurant.init.UIConst;
-import com.mastermarisa.maid_restaurant.uitls.manager.CookTaskManager;
+import com.mastermarisa.maid_restaurant.uitls.CookTaskManager;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -59,7 +59,7 @@ public class OrderingScreen extends Screen implements IPageable {
     public void initPages() {
         for (RecipeType<?> type : CookTaskManager.getAllRegisteredTypes()) {
             ICookTask iCookTask = CookTaskManager.getTask(type).get();
-            List<RecipeData> data = iCookTask.getAllRecipeData();
+            List<RecipeData> data = iCookTask.getAllRecipeData(player.level());
             List<ShowRecipePage> recipePages = new ArrayList<>();
             for (int i = 0;i < data.size();i += 16) {
                 List<RecipeData> pageData = new ArrayList<>();

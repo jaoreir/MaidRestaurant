@@ -1,4 +1,4 @@
-package com.mastermarisa.maid_restaurant.uitls.manager;
+package com.mastermarisa.maid_restaurant.uitls;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mastermarisa.maid_restaurant.MaidRestaurant;
@@ -10,11 +10,11 @@ import com.mastermarisa.maid_restaurant.entity.attachment.ServeRequestQueue;
 import com.mastermarisa.maid_restaurant.events.MaidTracker;
 import com.mastermarisa.maid_restaurant.task.TaskCooker;
 import com.mastermarisa.maid_restaurant.task.TaskWaiter;
-import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
 import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -66,12 +66,12 @@ public class RequestManager {
         MaidRestaurant.LOGGER.debug("SERVE_ADDED");
     }
 
-    public static ServeRequest fromCookRequest(CookRequest request, EntityMaid cooker, LinkedList<BlockPos> targetTables) {
+    public static ServeRequest fromCookRequest(CookRequest request, EntityMaid cooker, LinkedList<BlockPos> targetTables, Level level) {
         ServeRequest serveRequest = new ServeRequest();
         serveRequest.targetTables = targetTables;
         serveRequest.provider = cooker.getUUID();
         ICookTask task = CookTaskManager.getTask(request.type).get();
-        ItemStack result = task.getResult(RecipeUtils.byKeyTyped(request.type,request.id));
+        ItemStack result = task.getResult(Objects.requireNonNull(level.getRecipeManager().byKeyTyped(request.type, request.id)),level);
         serveRequest.requestedCount = result.getCount() * request.requestedCount;
         serveRequest.toServe = result.copyWithCount(result.getCount() * request.count);
 
@@ -121,7 +121,7 @@ public class RequestManager {
                 Collections.shuffle(cookers);
                 EntityMaid target = cookers.getFirst();
                 addRequest(target,pair.left());
-                addRequest(target,fromCookRequest(pair.left(),target,new LinkedList<>(pair.right())));
+                addRequest(target,fromCookRequest(pair.left(),target,new LinkedList<>(pair.right()),level));
                 toOrder.poll();
             }
         }

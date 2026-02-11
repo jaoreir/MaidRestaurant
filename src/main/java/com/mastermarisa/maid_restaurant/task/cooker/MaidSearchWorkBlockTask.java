@@ -2,14 +2,13 @@ package com.mastermarisa.maid_restaurant.task.cooker;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.google.common.collect.ImmutableMap;
-import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.data.TagBlock;
 import com.mastermarisa.maid_restaurant.init.InitEntities;
 import com.mastermarisa.maid_restaurant.task.api.MaidCheckRateTask;
 import com.mastermarisa.maid_restaurant.uitls.BehaviorUtils;
 import com.mastermarisa.maid_restaurant.uitls.TargetType;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
-import com.mastermarisa.maid_restaurant.uitls.manager.StateManager;
+import com.mastermarisa.maid_restaurant.uitls.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.StateManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -33,7 +32,7 @@ public class MaidSearchWorkBlockTask extends MaidCheckRateTask {
     protected boolean checkExtraStartConditions(ServerLevel level, EntityMaid maid) {
         return super.checkExtraStartConditions(level,maid) && RequestManager.getCurrentTask(maid).map(iCookTask -> {
             BlockPos pos = iCookTask.searchWorkBlock(level,maid,(int)maid.getRestrictRadius(),verticalSearchRange);
-            if (pos != null && maid.isWithinRestriction(pos) && StateManager.cookState(maid) == StateManager.CookState.COOK) {
+            if (pos != null && maid.isWithinRestriction(pos) && StateManager.cookState(maid,level) == StateManager.CookState.COOK) {
                 BehaviorUtils.setTargetPos(maid,new BlockPosTracker(pos),TargetType.COOK_BLOCK);
                 return true;
             }

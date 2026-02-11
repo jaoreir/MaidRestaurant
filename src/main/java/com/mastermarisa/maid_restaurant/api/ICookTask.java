@@ -3,7 +3,7 @@ package com.mastermarisa.maid_restaurant.api;
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.RecipeData;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -26,7 +26,9 @@ public interface ICookTask {
 
     List<StackPredicate> getKitchenWares();
 
-    ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder);
+    default ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
+        return recipeHolder.value().getResultItem(level.registryAccess());
+    }
 
     List<ItemStack> getCurrentInput(Level level, BlockPos pos, EntityMaid maid);
 
@@ -37,5 +39,5 @@ public interface ICookTask {
 
     void cookTick(ServerLevel level, EntityMaid maid, BlockPos pos, CookRequest request);
 
-    List<RecipeData> getAllRecipeData();
+    List<RecipeData> getAllRecipeData(Level level);
 }

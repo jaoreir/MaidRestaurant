@@ -8,9 +8,9 @@ import com.mastermarisa.maid_restaurant.init.InitEntities;
 import com.mastermarisa.maid_restaurant.task.TaskCooker;
 import com.mastermarisa.maid_restaurant.uitls.BehaviorUtils;
 import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
 import com.mastermarisa.maid_restaurant.uitls.TargetType;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
+import com.mastermarisa.maid_restaurant.uitls.RequestManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
@@ -43,7 +43,7 @@ public class MaidSearchTableTask extends Behavior<EntityMaid> {
 
         if (!request.targetTables.isEmpty()) {
             BlockPos pos = request.targetTables.getFirst().immutable();
-            if (!(level.getBlockState(pos).is(TagBlock.SERVE_MEAL_BLOCK) && level.getBlockState(pos.above()).canBeReplaced())) {
+            if (!BehaviorUtils.isValidServeBlock(level,pos)) {
                 if (request.targetTables.size() == 1) {
                     BehaviorUtils.setTargetPos(maid,new BlockPosTracker(pos), TargetType.DROP_MEAL_POS);
                     BehaviorUtils.eraseChairPos(maid);

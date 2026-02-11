@@ -1,6 +1,6 @@
 package com.mastermarisa.maid_restaurant.entity.attachment;
 
-import com.mastermarisa.maid_restaurant.uitls.manager.CookTaskManager;
+import com.mastermarisa.maid_restaurant.uitls.CookTaskManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.neoforged.neoforge.attachment.AttachmentSyncHandler;

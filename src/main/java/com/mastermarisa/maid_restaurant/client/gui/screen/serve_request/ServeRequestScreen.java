@@ -1,13 +1,12 @@
 package com.mastermarisa.maid_restaurant.client.gui.screen.serve_request;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.mastermarisa.maid_restaurant.client.gui.element.UIContainerHorizontal;
 import com.mastermarisa.maid_restaurant.client.gui.element.UIContainerVertical;
 import com.mastermarisa.maid_restaurant.client.gui.element.UIElement;
-import com.mastermarisa.maid_restaurant.entity.attachment.CookRequestQueue;
 import com.mastermarisa.maid_restaurant.entity.attachment.ServeRequest;
 import com.mastermarisa.maid_restaurant.entity.attachment.ServeRequestQueue;
 import com.mastermarisa.maid_restaurant.network.CancelRequestPayload;
+import com.mastermarisa.maid_restaurant.uitls.CookTaskManager;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -38,6 +37,7 @@ public class ServeRequestScreen extends Screen {
 
     public ServeRequestScreen(EntityMaid maid) {
         super(Component.empty());
+        CookTaskManager.register();
         this.maid = maid;
         this.basketList = new ArrayList<>();
         this.cancelButtons = new ArrayList<>();

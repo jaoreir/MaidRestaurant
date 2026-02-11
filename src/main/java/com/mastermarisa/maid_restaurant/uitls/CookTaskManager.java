@@ -1,4 +1,4 @@
-package com.mastermarisa.maid_restaurant.uitls.manager;
+package com.mastermarisa.maid_restaurant.uitls;
 
 import com.mastermarisa.maid_restaurant.api.ICookTask;
 import com.mastermarisa.maid_restaurant.task.cooktask.PotCookTask;

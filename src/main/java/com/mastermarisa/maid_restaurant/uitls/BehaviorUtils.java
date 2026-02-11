@@ -4,7 +4,6 @@ import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
 import com.mastermarisa.maid_restaurant.data.TagBlock;
 import com.mastermarisa.maid_restaurant.entity.SitEntity;
 import com.mastermarisa.maid_restaurant.init.InitEntities;
-import com.mastermarisa.maid_restaurant.uitls.manager.BlockUsageManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -132,5 +131,10 @@ public class BehaviorUtils {
             return !entities.isEmpty();
         }
         return false;
+    }
+
+    public static boolean isValidServeBlock(Level level, BlockPos pos) {
+        return  (level.getBlockState(pos).is(TagBlock.SERVE_MEAL_BLOCK) && level.getBlockState(pos.above()).canBeReplaced()) ||
+                StorageTypeManager.tryGetHandler(level,pos) != null;
     }
 }

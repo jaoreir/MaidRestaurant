@@ -1,7 +1,7 @@
 package com.mastermarisa.maid_restaurant.task.api;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.mastermarisa.maid_restaurant.uitls.manager.CheckRateManager;
+import com.mastermarisa.maid_restaurant.uitls.CheckRateManager;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.Behavior;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;

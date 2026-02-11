@@ -11,11 +11,9 @@ import com.mastermarisa.maid_restaurant.client.gui.screen.ordering.RecipeData;
 import com.mastermarisa.maid_restaurant.entity.attachment.CookRequest;
 import com.mastermarisa.maid_restaurant.uitls.BlockPosUtils;
 import com.mastermarisa.maid_restaurant.uitls.MaidInvUtils;
-import com.mastermarisa.maid_restaurant.uitls.RecipeUtils;
-import com.mastermarisa.maid_restaurant.uitls.StackPredicate;
-import com.mastermarisa.maid_restaurant.uitls.manager.BlockUsageManager;
-import com.mastermarisa.maid_restaurant.uitls.manager.RequestManager;
-import net.minecraft.client.Minecraft;
+import com.mastermarisa.maid_restaurant.uitls.component.StackPredicate;
+import com.mastermarisa.maid_restaurant.uitls.BlockUsageManager;
+import com.mastermarisa.maid_restaurant.uitls.RequestManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.server.level.ServerLevel;
@@ -23,9 +21,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,7 +52,7 @@ public class SteamerCookTask implements ICookTask {
     }
 
     @Override
-    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder) {
+    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
         return ((SteamerRecipe)recipeHolder.value()).getResult();
     }
 
@@ -68,7 +63,7 @@ public class SteamerCookTask implements ICookTask {
         Optional<CookRequest> request = RequestManager.peekCookRequest(maid);
         if (request.isEmpty()) return ans;
         CookRequest cookRequest = request.get();
-        SteamerRecipe recipe = RecipeUtils.getRecipeManager().byKeyTyped(ModRecipes.STEAMER_RECIPE,cookRequest.id).value();
+        SteamerRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STEAMER_RECIPE,cookRequest.id).value();
 
         for (SteamerBlockEntity steamer : steamers) {
             NonNullList<ItemStack> items = steamer.getItems();
@@ -104,7 +99,7 @@ public class SteamerCookTask implements ICookTask {
     @Override
     public void cookTick(ServerLevel level, EntityMaid maid, BlockPos pos, CookRequest request) {
         List<SteamerBlockEntity> steamers = getSteamers(level,pos);
-        SteamerRecipe recipe = RecipeUtils.getRecipeManager().byKeyTyped(ModRecipes.STEAMER_RECIPE,request.id).value();
+        SteamerRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STEAMER_RECIPE,request.id).value();
         for (SteamerBlockEntity steamer : steamers) {
             if (request.count <= 0) break;
             NonNullList<ItemStack> items = steamer.getItems();
@@ -141,14 +136,9 @@ public class SteamerCookTask implements ICookTask {
     }
 
     @Override
-    public List<RecipeData> getAllRecipeData() {
-        RecipeManager manager = RecipeUtils.getRecipeManager();
+    public List<RecipeData> getAllRecipeData(Level level) {
+        RecipeManager manager = level.getRecipeManager();
         List<RecipeData> ans = new ArrayList<>();
-        if (FMLEnvironment.dist == Dist.CLIENT) {
-            manager = Minecraft.getInstance().level.getRecipeManager();
-        } else if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-            manager = RecipeUtils.getRecipeManager();
-        }
         for (var holder : manager.getAllRecipesFor(ModRecipes.STEAMER_RECIPE)) {
             ans.add(new RecipeData(holder.id(),ModRecipes.STEAMER_RECIPE,getIcon(),holder.value().getResult()));
         }

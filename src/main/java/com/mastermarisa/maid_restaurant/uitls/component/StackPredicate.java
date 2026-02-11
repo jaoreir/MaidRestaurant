@@ -1,4 +1,4 @@
-package com.mastermarisa.maid_restaurant.uitls;
+package com.mastermarisa.maid_restaurant.uitls.component;
 
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
