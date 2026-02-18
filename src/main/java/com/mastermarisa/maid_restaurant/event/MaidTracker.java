@@ -49,12 +49,6 @@ public class MaidTracker {
 
             BehaviorUtils.eraseTargetPos(maid);
 
-            if (maid.getTask() instanceof TaskCook) {
-                CookRequest cookRequest = (CookRequest) RequestManager.peek(maid,CookRequest.TYPE);
-                if (cookRequest != null)
-                    Arrays.stream(cookRequest.targets).forEach(l -> BlockUsageManager.removeUser(EncodeUtils.decode(l),maid.getUUID()));
-            }
-
             if (maid.getTask() instanceof TaskWaiter) {
                 maid.getData(ServeRequestHandler.TYPE).toList().forEach(serveRequest -> {
                     serveRequest.targets.forEach(p -> BlockUsageManager.removeUser(p,maid.getUUID()));

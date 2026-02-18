@@ -17,7 +17,7 @@ public class OrderItem extends Item {
     public OrderItem() { super(new Item.Properties().stacksTo(1)); }
 
     public static boolean hasRequests(ItemStack stack) {
-        return stack.has(ModDataComponents.RECORDED_COOK_REQUESTS);
+        return false;
     }
 
     public InteractionResult useOn(UseOnContext context) {
@@ -33,12 +33,6 @@ public class OrderItem extends Item {
 
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        BlockSelection selection = player.getData(BlockSelection.TYPE);
-        if (!player.isSecondaryUseActive() && !selection.order.isEmpty()) {
-            selection.order.clear();
-            player.setData(BlockSelection.TYPE,selection);
-        }
-
         return super.use(level, player, usedHand);
     }
 }

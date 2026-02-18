@@ -51,23 +51,6 @@ public class BlockSelector {
             MaidRestaurant.LOGGER.debug("USER:" + BlockUsageManager.getUserCount(pos));
             event.setCanceled(true);
             event.setCancellationResult(ItemInteractionResult.SUCCESS);
-//            if (selection.order.stream().anyMatch(l -> l.asLong() == pos.asLong())) {
-//                selection.order.remove(pos);
-//                player.setData(BlockSelection.TYPE,selection);
-//                player.sendSystemMessage(Component.translatable("message.maid_restaurant.block_removed").append(":" + pos.getX() + "," + pos.getY() + "," + pos.getZ()));
-//                event.setCanceled(true);
-//                event.setCancellationResult(ItemInteractionResult.SUCCESS);
-//                player.getCooldowns().addCooldown(itemStack.getItem(),2);
-//            } else {
-//                if (TaskWaiter.isValidServeBlock(level,pos)) {
-//                    selection.order.add(pos);
-//                    player.setData(BlockSelection.TYPE,selection);
-//                    player.sendSystemMessage(Component.translatable("message.maid_restaurant.block_selected").append(":" + pos.getX() + "," + pos.getY() + "," + pos.getZ()));
-//                    event.setCanceled(true);
-//                    event.setCancellationResult(ItemInteractionResult.SUCCESS);
-//                    player.getCooldowns().addCooldown(itemStack.getItem(),2);
-//                }
-//            }
         }
     }
 }

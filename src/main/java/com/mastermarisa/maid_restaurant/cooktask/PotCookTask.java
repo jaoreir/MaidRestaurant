@@ -18,9 +18,12 @@ import com.mastermarisa.maid_restaurant.utils.component.RecipeData;
 import com.mastermarisa.maid_restaurant.utils.component.StackPredicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.entity.ai.village.poi.PoiRecord;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -69,11 +72,6 @@ public class PotCookTask implements ICookTask {
     @Override
     public List<StackPredicate> getKitchenWares() {
         return List.of(StackPredicate.of(TagMod.KITCHEN_SHOVEL));
-    }
-
-    @Override
-    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
-        return ((PotRecipe) recipeHolder.value()).result();
     }
 
     @Override
@@ -135,9 +133,9 @@ public class PotCookTask implements ICookTask {
     private void tickState0(ServerLevel level, EntityMaid maid, BlockPos pos, PotBlockEntity pot, CookRequest request) {
         BlockState state = level.getBlockState(pos);
         if (!state.getValue(PotBlock.HAS_OIL)) {
-            List<ItemStack> oil = ItemHandlerUtils.tryExtract(maid.getAvailableInv(false),1,StackPredicate.of(TagMod.OIL),true);
+            ItemStack oil = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(TagMod.OIL),true);
             if (!oil.isEmpty()) {
-                pot.onPlaceOil(level,maid,oil.getFirst());
+                pot.onPlaceOil(level,maid,oil);
                 maid.swing(InteractionHand.OFF_HAND);
             }
         } else {
@@ -148,13 +146,14 @@ public class PotCookTask implements ICookTask {
                 ItemStack shovel = ItemHandlerUtils.tryGet(maid.getAvailableInv(false),StackPredicate.of(TagMod.KITCHEN_SHOVEL));
                 if (!shovel.isEmpty()) {
                     pot.onShovelHit(level,maid,shovel);
+                    level.playSound((Player)null, maid.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, (level.random.nextFloat() - level.random.nextFloat()) * 0.8F);
                     maid.swing(InteractionHand.OFF_HAND);
                 }
             } else {
                 for (StackPredicate ingredient : required) {
-                    List<ItemStack> items = ItemHandlerUtils.tryExtract(maid.getAvailableInv(false),1,ingredient,true);
-                    if (!items.isEmpty()) {
-                        pot.addIngredient(level,maid,items.getFirst());
+                    ItemStack material = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,ingredient,true);
+                    if (!material.isEmpty()) {
+                        pot.addIngredient(level,maid,material);
                         maid.swing(InteractionHand.OFF_HAND);
                     }
                 }
@@ -167,7 +166,7 @@ public class PotCookTask implements ICookTask {
         if (!shovel.isEmpty()) {
             pot.onShovelHit(level,maid,shovel);
             maid.swing(InteractionHand.OFF_HAND);
-            ((ModEventTrigger) ModTrigger.EVENT.get()).trigger(maid, "stir_fry_in_pot");
+            level.playSound((Player)null, maid.blockPosition(), SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 1.0F, (level.random.nextFloat() - level.random.nextFloat()) * 0.8F);
         }
     }
 
@@ -193,7 +192,25 @@ public class PotCookTask implements ICookTask {
     }
 
     static {
-        blackList = new ArrayList<>(List.of("kaleidoscope_cookery:pot/braised_fish_salmon","kaleidoscope_cookery:pot/braised_fish_salmon_with_rice","kaleidoscope_cookery:pot/braised_fish_cod","kaleidoscope_cookery:pot/braised_fish_cod_with_rice"));
+        blackList = new ArrayList<>(List.of(
+                "kaleidoscope_cookery:pot/braised_fish_salmon",
+                "kaleidoscope_cookery:pot/braised_fish_salmon_with_rice",
+                "kaleidoscope_cookery:pot/braised_fish_cod",
+                "kaleidoscope_cookery:pot/braised_fish_cod_with_rice",
+                "kaleidoscope_cookery:pot/spicy_chicken_blaze_powder",
+                "kaleidoscope_cookery:pot/golden_salad_enchanted_golden_apple",
+                "kaleidoscope_cookery:pot/stargazy_pie_cod",
+                "kaleidoscope_cookery:pot/stargazy_pie_salmon",
+                "kaleidoscope_cookery:pot/sweet_and_sour_ender_pearls_2",
+                "kaleidoscope_cookery:pot/sweet_and_sour_ender_pearls_3",
+                "kaleidoscope_cookery:pot/spicy_chicken_rice_bowl_blaze_powder",
+                "kaleidoscope_cookery:pot/slime_ball_5_to_slime_ball_meal_1",
+                "kaleidoscope_cookery:pot/slime_ball_6_to_slime_ball_meal_1",
+                "kaleidoscope_cookery:pot/slime_ball_7_to_slime_ball_meal_1",
+                "kaleidoscope_cookery:pot/slime_ball_9_to_slime_ball_meal_2",
+                "kaleidoscope_cookery:pot/egg_fried_rice_2",
+                "kaleidoscope_cookery:pot/egg_fried_rice_3"
+        ));
         for (int i = 2;i <= 9;i++) {
             blackList.add("kaleidoscope_cookery:pot/stuffed_dough_food_to_meat_pie_" + i);
             blackList.add("kaleidoscope_cookery:pot/egg_to_fried_egg_" + i);

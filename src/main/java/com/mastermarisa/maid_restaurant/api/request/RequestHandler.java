@@ -2,6 +2,8 @@ package com.mastermarisa.maid_restaurant.api.request;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,8 +53,10 @@ public abstract class RequestHandler <T extends IRequest> implements INBTSeriali
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
+        ListTag listTag = new ListTag();
         tag.putInt("length",requests.size());
-        for (int i = 0;i < requests.size();i++) tag.put(String.valueOf(i),requests.get(i).serializeNBT(provider));
+        for (T request : requests) listTag.add(request.serializeNBT(provider));
+        tag.put("requests",listTag);
         tag.putBoolean("accept",accept);
 
         return tag;
@@ -62,8 +66,9 @@ public abstract class RequestHandler <T extends IRequest> implements INBTSeriali
     public void deserializeNBT(HolderLookup.Provider provider, CompoundTag tag) {
         if (!tag.contains("length")) return;
         requests = new LinkedList<>();
+        ListTag listTag = tag.getList("requests", Tag.TAG_COMPOUND);
         for (int i = 0;i < tag.getInt("length");i++) {
-            requests.add(fromCompound(provider,tag.getCompound(String.valueOf(i))));
+            requests.add(fromCompound(provider,listTag.getCompound(i)));
         }
         accept = tag.getBoolean("accept");
     }

@@ -1,6 +1,7 @@
 package com.mastermarisa.maid_restaurant.request.world;
 
 import com.mastermarisa.maid_restaurant.api.request.RequestHandler;
+import com.mastermarisa.maid_restaurant.api.request.RequestSyncer;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -14,5 +15,6 @@ public class WorldCookRequestHandler extends RequestHandler<CookRequest> {
         return request;
     }
 
-    public static final AttachmentType<WorldCookRequestHandler> TYPE = AttachmentType.serializable(WorldCookRequestHandler::new).build();
+    public static final AttachmentType<WorldCookRequestHandler> TYPE = AttachmentType.
+            serializable(WorldCookRequestHandler::new).sync(new RequestSyncer<>(WorldCookRequestHandler::new)).build();
 }

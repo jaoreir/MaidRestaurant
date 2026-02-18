@@ -1,6 +1,7 @@
 package com.mastermarisa.maid_restaurant.request.world;
 
 import com.mastermarisa.maid_restaurant.api.request.RequestHandler;
+import com.mastermarisa.maid_restaurant.api.request.RequestSyncer;
 import com.mastermarisa.maid_restaurant.request.ServeRequest;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -14,5 +15,6 @@ public class WorldServeRequestHandler extends RequestHandler<ServeRequest> {
         return request;
     }
 
-    public static final AttachmentType<WorldServeRequestHandler> TYPE = AttachmentType.serializable(WorldServeRequestHandler::new).build();
+    public static final AttachmentType<WorldServeRequestHandler> TYPE = AttachmentType.
+            serializable(WorldServeRequestHandler::new).sync(new RequestSyncer<>(WorldServeRequestHandler::new)).build();
 }

@@ -1,0 +1,24 @@
+{
+  "type": "kaleidoscope_cookery:stockpot",
+  "ingredients": [
+    {
+      "tag": "maid_restaurant:braised_fish_ingredient"
+    },
+    {
+      "tag": "maid_restaurant:braised_fish_ingredient"
+    },
+    {
+      "tag": "maid_restaurant:braised_fish_ingredient"
+    },
+    {
+      "item": "minecraft:kelp"
+    },
+    {
+      "item": "minecraft:bone_meal"
+    }
+  ],
+  "result": {
+    "count": 3,
+    "id": "kaleidoscope_cookery:seafood_miso_soup"
+  }
+}

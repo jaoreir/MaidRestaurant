@@ -53,18 +53,6 @@ public class CookRequest implements IRequest {
         this.attributes = new Attributes(attributes);
     }
 
-    public CookRequest(String id, String type, int remain, int requested, long[] targets, byte[] attributes) {
-        this(ResourceLocation.parse(id),CookTasks.getType(type),remain,requested,targets,attributes);
-    }
-
-    public CookRequest(String id, String type, int remain, int requested, List<Long> targets, List<Byte> attributes) {
-        this(ResourceLocation.parse(id),CookTasks.getType(type),remain, requested,targets.stream().mapToLong(Long::longValue).toArray(), EncodeUtils.toArray(attributes));
-    }
-
-    public CookRequest(ResourceLocation id, RecipeType<?> type, int remain, int requested, long[] targets) {
-        this(id,type,remain,requested,targets,new byte[]{});
-    }
-
     @Override
     public CompoundTag serializeNBT(HolderLookup.Provider provider) {
         CompoundTag tag = new CompoundTag();
@@ -110,10 +98,14 @@ public class CookRequest implements IRequest {
                     BlockState state = level.getBlockState(pos);
                     BlockEntity blockEntity = level.getBlockEntity(pos);
 
-                    if (blockEntity instanceof TableBlockEntity table && level.getBlockState(pos.immutable().above()).canBeReplaced()) {
-                        if (block) slot++;
+                    if (blockEntity instanceof TableBlockEntity table) {
+                        if (!level.getBlockState(pos.immutable().above()).canBeReplaced()) continue;
+                        if (block) {
+                            if (getEmptySlots(table.getItems()) == 4) slot++;
+                        }
                         else slot += getEmptySlots(table.getItems());
-                    } else if (state.is(TagBlock.SERVE_MEAL_BLOCK) && level.getBlockState(pos.immutable().above()).canBeReplaced()) {
+                    } else if (state.is(TagBlock.SERVE_MEAL_BLOCK)) {
+                        if (!level.getBlockState(pos.immutable().above()).canBeReplaced()) continue;
                         if (block) slot++;
                     } else {
                         IMaidStorage storage = MaidStorages.tryGetType(level,pos);
@@ -167,7 +159,7 @@ public class CookRequest implements IRequest {
         request.requested = requested;
         request.type = type;
         request.targets = Arrays.copyOf(targets,targets.length);
-        request.attributes = new Attributes(attributes.getAttributes());
+        request.attributes = new Attributes(Arrays.copyOf(attributes.getAttributes(),attributes.getAttributes().length));
         request.extraData = new CompoundTag();
         return request;
     }
@@ -209,46 +201,4 @@ public class CookRequest implements IRequest {
             attributes[1] = (byte) mode.id;
         }
     }
-
-    public String getId() { return id.toString(); }
-
-    public String getTypeUID() { return CookTasks.getUID(type); }
-
-    public int getRemain() { return remain; }
-
-    public int getRequested() { return requested; }
-
-    public List<Long> getTargets() { return Arrays.stream(targets).boxed().collect(Collectors.toList()); }
-
-    public List<Byte> getAttributes() {
-        return EncodeUtils.toList(attributes.getAttributes());
-    }
-
-    public static final Codec<CookRequest> CODEC = RecordCodecBuilder.create(instance ->
-        instance.group(
-                Codec.STRING.fieldOf("id").forGetter(CookRequest::getId),
-                Codec.STRING.fieldOf("type").forGetter(CookRequest::getTypeUID),
-                Codec.INT.fieldOf("remain").forGetter(CookRequest::getRemain),
-                Codec.INT.fieldOf("requested").forGetter(CookRequest::getRequested),
-                Codec.LONG.listOf().fieldOf("targets").forGetter(CookRequest::getTargets),
-                Codec.BYTE.listOf().fieldOf("attributes").forGetter(CookRequest::getAttributes)
-        ).apply(instance,CookRequest::new)
-    );
-
-    public static final StreamCodec<FriendlyByteBuf, CookRequest> STREAM_CODEC =
-            StreamCodec.composite(
-                    ByteBufCodecs.STRING_UTF8,
-                    CookRequest::getId,
-                    ByteBufCodecs.STRING_UTF8,
-                    CookRequest::getTypeUID,
-                    ByteBufCodecs.INT,
-                    CookRequest::getRemain,
-                    ByteBufCodecs.INT,
-                    CookRequest::getRequested,
-                    ByteBufCodecs.VAR_LONG.apply(ByteBufCodecs.list()),
-                    CookRequest::getTargets,
-                    ByteBufCodecs.BYTE.apply(ByteBufCodecs.list()),
-                    CookRequest::getAttributes,
-                    CookRequest::new
-            );
 }

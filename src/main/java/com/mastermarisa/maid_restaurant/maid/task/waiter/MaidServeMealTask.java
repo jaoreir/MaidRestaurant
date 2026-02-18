@@ -103,6 +103,10 @@ public class MaidServeMealTask extends MaidTickRateTask implements IStep {
         }
 
         if (state.is(TagBlock.SERVE_MEAL_BLOCK)) {
+            if (!level.getBlockState(pos.immutable().above()).canBeReplaced()) {
+                removeTargetTable(level,maid,pos,request);
+                return;
+            }
             if (level.getBlockEntity(pos) instanceof TableBlockEntity table) {
                 ItemStackHandler tableItems = table.getItems();
                 int count = getEmptySlots(tableItems);

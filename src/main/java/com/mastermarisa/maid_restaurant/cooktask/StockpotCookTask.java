@@ -40,7 +40,6 @@ import java.util.Objects;
 public class StockpotCookTask implements ICookTask {
     public static final String UID = "StockpotCookTask";
     public static final List<String> blackList;
-    public static final List<RecipeData> ans;
 
     @Override
     public String getUID() {
@@ -64,19 +63,9 @@ public class StockpotCookTask implements ICookTask {
         if (!recipe.carrier().isEmpty())
             for (int i = 0;i < recipe.result().getCount();i++)
                 predicates.add(StackPredicate.of(recipe.carrier()));
-        predicates.add(StackPredicate.of((stack)-> SoupBaseManager.getSoupBase(recipe.soupBase()).isSoupBase(stack)));
+        predicates.add(StackPredicate.of(SoupBaseManager.getSoupBase(recipe.soupBase())::isSoupBase));
 
         return predicates;
-    }
-
-    @Override
-    public List<StackPredicate> getKitchenWares() {
-        return List.of();
-    }
-
-    @Override
-    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
-        return ((StockpotRecipe) recipeHolder.value()).result();
     }
 
     @Override
@@ -164,9 +153,9 @@ public class StockpotCookTask implements ICookTask {
                 }
             }
 
-            List<ItemStack> buckets = ItemHandlerUtils.tryExtract(maid.getAvailableInv(false),1,StackPredicate.of(iSoupBase::isSoupBase),true);
-            if (!buckets.isEmpty()) {
-                pot.addSoupBase(level,maid,buckets.getFirst());
+            ItemStack bucket = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(iSoupBase::isSoupBase),true);
+            if (!bucket.isEmpty()) {
+                pot.addSoupBase(level,maid,bucket);
                 maid.swing(InteractionHand.OFF_HAND);
             }
         }
@@ -180,16 +169,16 @@ public class StockpotCookTask implements ICookTask {
             List<StackPredicate> required = new ArrayList<>(recipe.ingredients().stream().filter(s->!s.isEmpty()).map(StackPredicate::new).toList());
             required = ItemHandlerUtils.getRequired(required,pot.getInputs());
             if (required.isEmpty()) {
-                List<ItemStack> lids = ItemHandlerUtils.tryExtract(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID.asItem()),true);
-                if (!lids.isEmpty()) {
-                    pot.onLitClick(level,maid,lids.getFirst());
+                ItemStack lid = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID.asItem()),true);
+                if (!lid.isEmpty()) {
+                    pot.onLitClick(level,maid,lid);
                     maid.swing(InteractionHand.OFF_HAND);
                 }
             } else {
                 for (StackPredicate ingredient : required) {
-                    List<ItemStack> items = ItemHandlerUtils.tryExtract(maid.getAvailableInv(false),1,ingredient,true);
-                    if (!items.isEmpty()) {
-                        pot.addIngredient(level,maid,items.getFirst());
+                    ItemStack material = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,ingredient,true);
+                    if (!material.isEmpty()) {
+                        pot.addIngredient(level,maid,material);
                         maid.swing(InteractionHand.OFF_HAND);
                     }
                 }
@@ -199,9 +188,9 @@ public class StockpotCookTask implements ICookTask {
 
     protected void tickState2(ServerLevel level, EntityMaid maid, BlockPos pos, StockpotBlockEntity pot, CookRequest request) {
         if (!pot.hasLid()) {
-            List<ItemStack> lids = ItemHandlerUtils.tryExtract(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID.asItem()),true);
-            if (!lids.isEmpty()) {
-                pot.onLitClick(level,maid,lids.getFirst());
+            ItemStack lid = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(ModItems.STOCKPOT_LID.asItem()),true);
+            if (!lid.isEmpty()) {
+                pot.onLitClick(level,maid,lid);
                 maid.swing(InteractionHand.OFF_HAND);
             }
         }
@@ -212,9 +201,9 @@ public class StockpotCookTask implements ICookTask {
             takeLid(level,maid,pos,pot);
         } else {
             StockpotRecipe recipe = level.getRecipeManager().byKeyTyped(ModRecipes.STOCKPOT_RECIPE,request.id).value();
-            List<ItemStack> carriers = ItemHandlerUtils.tryExtract(maid.getAvailableInv(false),1, StackPredicate.of(recipe.carrier()),true);
-            if (!carriers.isEmpty()) {
-                pot.takeOutProduct(level,maid,carriers.getFirst());
+            ItemStack carrier = ItemHandlerUtils.tryExtractSingleSlot(maid.getAvailableInv(false),1,StackPredicate.of(recipe.carrier()),true);
+            if (!carrier.isEmpty()) {
+                pot.takeOutProduct(level,maid,carrier);
                 maid.swing(InteractionHand.OFF_HAND);
                 if (pot.getTakeoutCount() == 0)
                     request.remain--;
@@ -233,8 +222,11 @@ public class StockpotCookTask implements ICookTask {
     }
 
     static {
-        blackList = new ArrayList<>();
-        ans = new ArrayList<>();
+        blackList = new ArrayList<>(List.of(
+                "kaleidoscope_cookery:stockpot/seafood_miso_soup_cod",
+                "kaleidoscope_cookery:stockpot/seafood_miso_soup_salmon",
+                "kaleidoscope_cookery:stockpot/shengjian_mantou_count_2"
+        ));
         for (int i = 2;i <= 9;i++) {
             blackList.add("kaleidoscope_cookery:stockpot/dumpling_count_" + i);
         }

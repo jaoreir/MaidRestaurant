@@ -1,7 +1,6 @@
 package com.mastermarisa.maid_restaurant.utils;
 
 import com.github.tartaricacid.touhoulittlemaid.entity.passive.EntityMaid;
-import com.mastermarisa.maid_restaurant.MaidRestaurant;
 import com.mastermarisa.maid_restaurant.api.request.IRequest;
 import com.mastermarisa.maid_restaurant.event.MaidTracker;
 import com.mastermarisa.maid_restaurant.maid.TaskCook;
@@ -14,20 +13,14 @@ import com.mastermarisa.maid_restaurant.request.world.WorldCookRequestHandler;
 import com.mastermarisa.maid_restaurant.request.world.WorldServeRequestHandler;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class RequestManager {
     private static final double MAX_RANGE = 50.0D;
-    private static final Logger log = LoggerFactory.getLogger(RequestManager.class);
 
     public static @Nullable IRequest peek(EntityMaid maid, int type) {
         switch (type) {
@@ -92,22 +85,21 @@ public class RequestManager {
         List<ServeRequest> toRemove = new ArrayList<>();
         WorldServeRequestHandler handler = level.getData(WorldServeRequestHandler.TYPE);
         for (var request : handler.toList()) {
-            if (level.getEntity(request.provider) instanceof EntityMaid cooker && cooker.getTask() instanceof TaskCook) {
-                List<EntityMaid> waiters = MaidTracker.maids.stream().filter(maid -> maid.getTask() instanceof TaskWaiter).filter(m-> {
-                    ServeRequestHandler requests = m.getData(ServeRequestHandler.TYPE);
-                    return requests.accept && requests.size() < 4 && m.distanceToSqr(cooker) <= Math.pow(MAX_RANGE,2.0D);
-                }).toList();
-                if (!waiters.isEmpty()) {
-                    waiters = new ArrayList<>(waiters);
-                    Collections.shuffle(waiters);
-                    EntityMaid waiter = waiters.getFirst();
-                    ServeRequestHandler serveRequestHandler = waiter.getData(ServeRequestHandler.TYPE);
-                    serveRequestHandler.add(request);
-                    serveRequestHandler.toList().forEach(r -> {
-                        r.targets.forEach(p -> BlockUsageManager.addUser(p, waiter.getUUID()));
-                    });
-                    toRemove.add(request);
-                }
+            BlockPos pos = request.targets.getFirst();
+            List<EntityMaid> waiters = MaidTracker.maids.stream().filter(maid -> maid.getTask() instanceof TaskWaiter).filter(m-> {
+                ServeRequestHandler requests = m.getData(ServeRequestHandler.TYPE);
+                return requests.size() < 5 && pos.distSqr(m.blockPosition()) <= Math.pow(MAX_RANGE,2.0D);
+            }).toList();
+            if (!waiters.isEmpty()) {
+                waiters = new ArrayList<>(waiters);
+                Collections.shuffle(waiters);
+                EntityMaid waiter = waiters.getFirst();
+                ServeRequestHandler serveRequestHandler = waiter.getData(ServeRequestHandler.TYPE);
+                serveRequestHandler.add(request);
+                serveRequestHandler.toList().forEach(serveRequest -> {
+                    serveRequest.targets.forEach(p -> BlockUsageManager.addUser(p,waiter.getUUID()));
+                });
+                toRemove.add(request);
             }
         }
 

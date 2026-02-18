@@ -49,16 +49,6 @@ public class SteamerCookTask implements ICookTask {
     }
 
     @Override
-    public List<StackPredicate> getKitchenWares() {
-        return List.of();
-    }
-
-    @Override
-    public ItemStack getResult(RecipeHolder<? extends Recipe<?>> recipeHolder, Level level) {
-        return ((SteamerRecipe)recipeHolder.value()).getResult();
-    }
-
-    @Override
     public List<ItemStack> getCurrentInput(Level level, BlockPos pos, EntityMaid maid) {
         List<ItemStack> ans = new ArrayList<>();
         List<SteamerBlockEntity> steamers = getSteamers(level,pos);
@@ -68,10 +58,10 @@ public class SteamerCookTask implements ICookTask {
 
         for (SteamerBlockEntity steamer : steamers) {
             NonNullList<ItemStack> items = steamer.getItems();
-            for (int i = 0;i < items.size();i++)
-                if (recipe.getIngredient().test(items.get(i)))
-                    ans.add(items.get(i));
-                else if (items.get(i).is(recipe.getResult().getItem()))
+            for (ItemStack item : items)
+                if (recipe.getIngredient().test(item))
+                    ans.add(item);
+                else if (item.is(recipe.getResult().getItem()))
                     ans.add(recipe.getIngredient().getItems()[0]);
         }
 

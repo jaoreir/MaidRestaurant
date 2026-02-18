@@ -21,8 +21,8 @@ import java.util.stream.Collectors;
 public class ServeRequest implements IRequest {
     public static final int TYPE = 1;
 
-    public ItemStack toServe;
-    public LinkedList<BlockPos> targets;
+    public ItemStack toServe = ItemStack.EMPTY;
+    public LinkedList<BlockPos> targets = new LinkedList<>();
     public UUID provider;
     public int requested;
 

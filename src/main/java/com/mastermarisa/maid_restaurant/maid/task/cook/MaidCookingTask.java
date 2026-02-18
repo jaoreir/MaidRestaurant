@@ -9,11 +9,13 @@ import com.mastermarisa.maid_restaurant.maid.task.base.MaidTickRateTask;
 import com.mastermarisa.maid_restaurant.request.CookRequest;
 import com.mastermarisa.maid_restaurant.request.ServeRequest;
 import com.mastermarisa.maid_restaurant.utils.*;
+import com.mojang.logging.LogUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.behavior.PositionTracker;
 import net.minecraft.world.entity.ai.memory.MemoryStatus;
 import net.minecraft.world.phys.Vec3;
+import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -43,8 +45,8 @@ public class MaidCookingTask extends MaidTickRateTask {
             if (request == null) return false;
             if (request.remain <= 0) {
                 Arrays.stream(request.targets).forEach(l -> BlockUsageManager.removeUser(EncodeUtils.decode(l),maid.getUUID()));
-                RequestManager.pop(maid,CookRequest.TYPE);
-                RequestManager.post(level, ServeRequest.from(level,maid.getUUID(),request), ServeRequest.TYPE);
+                RequestManager.post(level, ServeRequest.from(level,maid.getUUID(),(CookRequest) RequestManager.pop(maid,CookRequest.TYPE)), ServeRequest.TYPE);
+                Debug.Log("SERVE_SENT");
                 return false;
             }
 
@@ -83,7 +85,7 @@ public class MaidCookingTask extends MaidTickRateTask {
         BlockPos pos = maid.getBrain().getMemory(ModEntities.TARGET_POS.get()).get().currentBlockPosition();
         CookRequest request = Objects.requireNonNull((CookRequest) RequestManager.peek(maid,CookRequest.TYPE));
         ICookTask iCookTask = CookTasks.getTask(request.type);
-        BehaviorUtils.setLookTargetMemory(maid,pos);
+        //BehaviorUtils.setLookTargetMemory(maid,pos.below());
 
         iCookTask.cookTick(level,maid,pos,request);
     }

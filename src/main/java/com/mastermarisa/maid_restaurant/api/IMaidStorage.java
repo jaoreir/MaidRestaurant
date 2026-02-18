@@ -21,7 +21,7 @@ public interface IMaidStorage {
 
     @Nullable IItemHandler getHandler(Level level, BlockPos pos);
 
-    @NotNull ItemStack extract(Level level, BlockPos pos, int slot, int amount, boolean simulate);
+    ItemStack extract(Level level, BlockPos pos, int slot, int amount, boolean simulate);
 
-    @NotNull ItemStack insert(Level level, BlockPos pos, ItemStack stack, boolean simulate);
+    ItemStack insert(Level level, BlockPos pos, ItemStack stack, boolean simulate);
 }

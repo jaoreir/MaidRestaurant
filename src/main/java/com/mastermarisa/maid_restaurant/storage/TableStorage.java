@@ -28,7 +28,7 @@ public class TableStorage implements IMaidStorage {
 
     @Override
     public @Nullable IItemHandler getHandler(Level level, BlockPos pos) {
-        if (level.getBlockEntity(pos) instanceof TableBlockEntity table) {
+        if (level.getBlockEntity(pos) instanceof TableBlockEntity table && level.getBlockState(pos.immutable().above()).canBeReplaced()) {
             return table.getItems();
         }
 
@@ -36,7 +36,7 @@ public class TableStorage implements IMaidStorage {
     }
 
     @Override
-    public @NotNull ItemStack extract(Level level, BlockPos pos, int slot, int amount, boolean simulate) {
+    public ItemStack extract(Level level, BlockPos pos, int slot, int amount, boolean simulate) {
         IItemHandler handler = getHandler(level,pos);
         if (handler != null) {
             TableBlockEntity table = Objects.requireNonNull((TableBlockEntity) level.getBlockEntity(pos));
@@ -55,7 +55,7 @@ public class TableStorage implements IMaidStorage {
     }
 
     @Override
-    public @NotNull ItemStack insert(Level level, BlockPos pos, ItemStack stack, boolean simulate) {
+    public ItemStack insert(Level level, BlockPos pos, ItemStack stack, boolean simulate) {
         IItemHandler handler = getHandler(level,pos);
         if (handler != null) {
             int index = -1;
